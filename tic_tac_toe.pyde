@@ -1,5 +1,5 @@
 def setup():
-   # window size and color
+   # winnerdow size and color
     size(600,600)
     background(0)
     
@@ -20,8 +20,21 @@ rowCount = [0,0,0]
 columnCount = [0,0,0]
 diCount = [0,0]
 
-#Keeps track of who wins. N stands for nobody. If X wins, win = "X", and if O wins, win = "O"
-win = "N"
+#Keeps track of who winners. N stands for nobody. If X winners, winner = "X", and if O winners, winner = "O"
+winner = "N"
+
+
+
+def placeToken(activePlayer, x, y):
+    text("X", (xValues[x+1]+xValues[x])/2, (yValues[y+1]+yValues[y])/2)
+    squarePlaced[3*x+y] += 1
+    columnCount[x] += 1
+    rowCount[y] += 1
+    if x == y:
+        diCount[0] += 1
+    elif x+y == 2:
+        diCount[1] += 1
+    switchPlayer()
 
 def mouseReleased():
     global player, squarePlaced, rowCount, columnCount, diCount
@@ -37,17 +50,9 @@ def mouseReleased():
         for y in range(len(yValues)-1):
             if mouseX < xValues[x+1] and mouseY < yValues[y+1] and mouseX > xValues[x] and mouseY > yValues[y] and squarePlaced[3*x+y] == 0:
                 if player == "X":
-                    text("X", 0.5*xValues[x+1]+0.5*xValues[x], 0.5*yValues[y+1]+0.5*yValues[y])
-                    squarePlaced[3*x+y] += 1
-                    columnCount[x] += 1
-                    rowCount[y] += 1
-                    if x == y:
-                        diCount[0] += 1
-                    elif x+y == 2:
-                        diCount[1] += 1
-                    player = "O"
+                    placeToken
                 elif player == "O":
-                    text("O", 0.5*xValues[x+1]+0.5*xValues[x], 0.5*yValues[y+1]+0.5*yValues[y])
+                    text("O", (xValues[x+1]+xValues[x])/2, (yValues[y+1]+yValues[y])/2)
                     squarePlaced[3*x+y] = -1
                     columnCount[x] -= 1
                     rowCount[y] -= 1
@@ -60,40 +65,37 @@ def mouseReleased():
            
 
 
+def determineWinner(n):
+    global winner
+    if winner == "N":
+        if n == 3:
+            winner = "X"
+        elif n == -3:
+            winner = "O"
+    return winner
 
-def winScreen():
-    global win
-    for x in range(256):
-        background(0, x)
-    for c in range(256):
-        fill(255, c)
-        text(win + " Wins.")
+def winScreen(n):
+    if n != "N":
+        rectMode(CENTER)
+        fill(0)
+        stroke(255)
+        rect(width/2, height/2, 300, 100)
+        textAlign(CENTER, CENTER)
+        fill(255)
+        text(winner + " Wins.", width/2+5, height/2-10)
     
     
         
     
     
 def draw():
-    global rowCount, columnCount, diCount, win
+    global rowCount, columnCount, diCount, winner
     for a in rowCount:
-        if a == 3:
-            win = "X"
-            winScreen()
-        elif a == -3:
-            win = "O"
-            winScreen()
+        determineWinner(a)
     for b in columnCount:
-        if b == 3:
-            win = "X"
-            winScreen()
-        elif b == -3:
-            win = "O"
-            winScreen()
+        determineWinner(b)
     for c in diCount:
-        if c == 3:
-            win = "X"
-            winScreen()
-        elif c == -3:
-            win = "O"
-            winScreen()
+        determineWinner(c)
+    winScreen(winner)
         
+    
