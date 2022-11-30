@@ -1,13 +1,12 @@
 
 def setup():
-    global player, token
-   # window size and color
+    # window size and color
     size(DIMENSION,DIMENSION)
     background(0)
     textSize(DIMENSION/6)
     textAlign(CENTER)
     reset()
-    player = "X"
+    frameRate(2)
 
 
     
@@ -16,10 +15,9 @@ def setup():
 #Square dimensions
 DIMENSION = 600
 
-
-
 #list which stores the values of each square (0 means nothing in the square, +1 is an X in the square, -1 is an o in the square)
 squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+emptySquare = []
 
 #Total value of +1 (x) and -1 (o) in a given row or column, going from left to right, top to bottom, and for the diagonals, the one going from top left ot bottom right is index 0 and the one going from bottom left to top right is index 1.
 rowCount = [0,0,0]
@@ -78,24 +76,37 @@ def mouseReleased():
             reset()
             
 def popupClicked():
-    return mouseX > width/2-0.375*offset and mouseX < width/2+0.375*offset and mouseY > 1.875*offset and mouseY < 2.125*offset 
+    mXLower = width/2 - 0.375*offset
+    mXUpper = width/2 + 0.375*offset
+
+    mYLower = 1.875*offset
+    mYUpper = 2.125*offset
+
+    return (mouseX > mXLower and mouseX < mXUpper) and (mouseY > mYLower and mouseY < mYUpper )
 
 
 
 def reset():
     global winner, squarePlaced, rowCount, columnCount, diCount, player, tokenColor, xColor, oColor, token
     background(0)
+    
     # lines, size, and color 
     stroke(255)
     strokeWeight(5)
+    
     #Line column 1
     line(offset,0,offset,height)
+    
     #Line column 2
     line(2*offset,0,2*offset,height)
+    
     #Line row 1
     line(0,offset,width,offset)
+    
     #Line row 2
     line(0,2*offset,width,2*offset)
+    
+    #initialize values
     winner = "N"
     squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
     rowCount = [0, 0, 0]
@@ -123,6 +134,7 @@ def determineWinner(n):
             winner = "X"
         elif n == -3:
             winner = "O"
+    
     return winner
 
 def winScreen(n):
@@ -148,8 +160,13 @@ def winScreen(n):
 def randomColor():
     fill(random(100,255), random(100,255), random(100,255))
     
-    
-        
+def checkTie():
+    global squareCount, emptySquare
+    for val in squareCount:
+        if val == 0:
+            emptySquare.append(val)
+    if len(emptySquare) == 0:
+        winner = "Tie" 
     
 def draw():
     global rowCount, columnCount, diCount, winner
@@ -162,6 +179,9 @@ def draw():
     for tokenCount in diCount:
         determineWinner(tokenCount)
         print(diCount)
+    
+
+    
     winScreen(winner)
         
     
