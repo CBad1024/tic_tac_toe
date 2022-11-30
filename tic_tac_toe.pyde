@@ -150,7 +150,7 @@ def playAgain():
         textSize(DIMENSION/6) ## reset the text size
         
 def randomColor():
-    fill(random(100,255), random(100,255), random(100,255))
+    fill(random(255), random(255), random(255))
     
 def checkTie(): 
     global winner   
