@@ -5,9 +5,8 @@ def setup():
     background(0)
     textSize(DIMENSION/6)
     textAlign(CENTER)
-    reset()
-    frameRate(2)
-
+    frameRate(4)
+    grid()
 
     
 #Define global variables
@@ -32,14 +31,23 @@ player = "X"
 token = 1
 xColor = "#F0B905"
 oColor = "#0AF0D3"
-tokenColor = xColor
+tokenColor = xColor # initial Color for "X" token
 
 #Values which deetermine where to place the Xs and Os on the screen, as well as acting as values which, when plugged into an equation, allow us to map each X or O to a value in squarePlaced
 offset = DIMENSION/3
+
+# Grid bounds
 bounds = [0, offset, 2*offset, 3*offset]
-#switches player for every valid mouse released
+
+# Button bounds
+btnBounds = [DIMENSION/2 - 0.375*offset, DIMENSION/2 + 0.375*offset, 1.875*offset, 2.125*offset]
+
+
+# Define helper functions
+
 def switchPlayer():
     global player, token, tokenColor
+    
     if player == "X":
         player = "O"
         tokenColor = oColor
@@ -49,7 +57,8 @@ def switchPlayer():
     token *= -1
 
 def placeToken(activePlayer, x, y):
-    global token, bounds, squarePlaced, columnCount, diCount, rowCount, tokenColor
+    global squarePlaced, columnCount, diCount, rowCount
+    
     fill(tokenColor)
     text(activePlayer, (bounds[x+1]+bounds[x])/2, (bounds[y+1]+bounds[y])/2)
     squarePlaced[3*x+y] = token
@@ -62,49 +71,39 @@ def placeToken(activePlayer, x, y):
     switchPlayer()
 
 def mouseReleased():
-    global player, squarePlaced, rowCount, columnCount, diCount
     
     if winner == "N":
-    
         #For loop and if statement that checks where mouse is released and whether the square which the mouse was released on is already filled  
         for x in range(3):
             for y in range(3):
-                if withinBounds(mouseX, x) and withinBounds(mouseY, y) and emptySquare(x, y):
-                    placeToken(player, x, y)
-    else:
-        if popupClicked():
+                if withinBounds(mouseX, x, bounds) and withinBounds(mouseY, y, bounds) and emptySquare(x, y):
+                    placeToken(player, x, y)        
+    else: # Winner Found or it is a Draw
+        if playAgainClicked(): # Check if PlayAgain is Clicked
             reset()
             
-def popupClicked():
-    mXLower = width/2 - 0.375*offset
-    mXUpper = width/2 + 0.375*offset
+def playAgainClicked():
+    return withinBounds(mouseX,0, btnBounds) and withinBounds(mouseY,2, btnBounds)
 
-    mYLower = 1.875*offset
-    mYUpper = 2.125*offset
+def withinBounds(mPos, n, bounds):
+    return mPos > bounds[n] and mPos < bounds[n+1]
 
-    return (mouseX > mXLower and mouseX < mXUpper) and (mouseY > mYLower and mouseY < mYUpper )
-
-
-
-def reset():
-    global winner, squarePlaced, rowCount, columnCount, diCount, player, tokenColor, xColor, oColor, token
+def grid():
     background(0)
     
     # lines, size, and color 
     stroke(255)
     strokeWeight(5)
+
+    line(offset,0,offset,height)     #Line column 1
+    line(2*offset,0,2*offset,height) #Line column 2
+    line(0,offset,width,offset)  #Line row 1
+    line(0,2*offset,width,2*offset)   #Line row 2
+
+def reset():
+    global winner, squarePlaced, rowCount, columnCount, diCount, player, tokenColor, token
     
-    #Line column 1
-    line(offset,0,offset,height)
-    
-    #Line column 2
-    line(2*offset,0,2*offset,height)
-    
-    #Line row 1
-    line(0,offset,width,offset)
-    
-    #Line row 2
-    line(0,2*offset,width,2*offset)
+    grid()
     
     #initialize values
     winner = "N"
@@ -115,13 +114,6 @@ def reset():
     player = "X"
     tokenColor = xColor
     token = 1
-    textSize(100)
-
-
-                
-def withinBounds(mPos, n):
-    global bounds
-    return mPos > bounds[n] and mPos < bounds[n+1]
 
 def emptySquare(x, y):
     global squarePlaced
@@ -129,6 +121,7 @@ def emptySquare(x, y):
 
 def determineWinner(n):
     global winner
+    
     if winner == "N":
         if n == 3:
             winner = "X"
@@ -137,51 +130,52 @@ def determineWinner(n):
     
     return winner
 
-def winScreen(n):
-    global tokenColor
-    if n != "N":
-        rectMode(CENTER)
-        fill(0)
-        stroke(255)
-        rect(width/2, height/2, 1.5*offset, 0.5*offset)
-        
-        textAlign(CENTER)
+def winScreen(message):
+    rectMode(CENTER)
+    fill(0)
+    stroke(255)
+    rect(width/2, height/2, 1.5*offset, 0.5*offset)
     
-        randomColor()
-        textSize(100)
-        text(winner + " Wins", width/2, height/2+offset/10)
-        
+    randomColor()
+    textAlign(CENTER)
+    text(message, width/2, height/2+offset/10)
+    playAgain()
+
+def playAgain():    
         fill(30, 0, 255)
         rect(width/2, 2*offset, 0.75*offset, 0.25*offset)
-        textSize(20)
+        textSize(DIMENSION/30)
         fill(255)
         text("PLAY AGAIN", width/2, 2*offset)
+        textSize(DIMENSION/6) ## reset the text size
         
 def randomColor():
     fill(random(100,255), random(100,255), random(100,255))
     
-def checkTie():
-    global squareCount, emptySquare
-    for val in squareCount:
-        if val == 0:
-            emptySquare.append(val)
-    if len(emptySquare) == 0:
-        winner = "Tie" 
+def checkTie(): 
+    global winner   
+    if winner == "N": # no winner found
+        if  not ( 0 in squarePlaced):
+            # this is a tie : no more empty squares
+            winner = "D"  # Draw   
     
 def draw():
-    global rowCount, columnCount, diCount, winner
     for tokenCount in rowCount:
         determineWinner(tokenCount)
-        print(rowCount)
+
     for tokenCount in columnCount:
         determineWinner(tokenCount)
-        print(columnCount)
+
     for tokenCount in diCount:
         determineWinner(tokenCount)
-        print(diCount)
-    
-
-    
-    winScreen(winner)
         
+
+    checkTie()
     
+    if winner == "X" or winner == "O": # winner found
+        winScreen(str(winner) + " wins")
+    elif winner == "D":
+        winScreen("DRAW")
+    
+    
+        
