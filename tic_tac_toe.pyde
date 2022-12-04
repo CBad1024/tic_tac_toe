@@ -169,8 +169,8 @@ def checkTie():
 def statsScreen():
     if mousePressed:
         background(0)
-        textSize(100)
-        text("X & O Win Stats:", width/2, offset/2)
+        textSize(DIMENSION/12)
+        text("Type your name below:", width/2, offset/2)
 def leaderboard(): 
     global squarePlaced, winner
     fill(150)
@@ -178,17 +178,25 @@ def leaderboard():
     rect(2*offset, 2*offset, 0.75*offset, 0.25*offset)
     fill(255)
     text("STATS", 2*offset, 2*offset)
+    
+    if winner != "N" and winner != "STOP": 
+        f = createWriter("leaderboard.txt")
+        f.print(winner)
+        f.flush()
+        f.close
     if statsClicked() and mousePressed:
         reset()
         winner = "STOP"
         squarePlaced = [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]
         statsScreen()
-    f = createWriter("leaderboard.txt")
-    f.print(winner)
-    f.flush()
-    f.close
-    r = createReader("leaderboard.txt")
-    text(r.readLine(), width/2, offset)
+        r = createReader("leaderboard.txt")
+        winStats = [r.readLine()]
+        # for "X" in winStats:
+        #     print("X")
+        
+        
+  
+    
     
 def draw():
     for tokenCount in rowCount:
