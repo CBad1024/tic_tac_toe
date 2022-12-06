@@ -14,6 +14,7 @@ def setup():
 #If play has begun yet
 playStarted = False
 playerSelect = False
+play = False
 
 
 
@@ -52,8 +53,9 @@ bounds = [0, offset, 2*offset, 3*offset]
 # Button bounds
 playAgainBtnBounds = [0.625*offset, 1.375*offset, 1.875*offset, 2.125*offset]
 statsBtnBounds = [1.625*offset, 2.375*offset, 1.875*offset, 2.125*offset]
-XtypeNameBounds = [0.5*offset, 1.5*offset, 5/3*offset, 7/3*offset]
-OtypeNameBounds = [1.5*offset, 2.5*offset, 5/3*offset, 7/3*offset]
+XtypeNameBounds = [0.75*offset, 1.25*offset, 1.83*offset, 2.16*offset]
+OtypeNameBounds = [1.75*offset, 2.25*offset, 1.83*offset, 2.16*offset]
+playBtnBounds = [1.25*offset, 1.75*offset, 1.75*offset, 2.25*offset]
 
 # Define helper functions
 def startScreen():
@@ -68,40 +70,49 @@ def startScreen():
         text("Click anywhere to start...", width/2, height/2)
         if mousePressed:
             playerSelect = True
-            playerSelectScreen()
+            reset()
+            
             
             
     
     
 
 def playerSelectScreen():
+    global playerX, playerO, play
+    if playerSelect and not play:
+        background(0)
+        textSize(DIMENSION/14)
+        fill(0, 255, 0)
+        text("Type your names below", width/2, height/4)
+        textSize(DIMENSION/18)
+        text("Player X", offset, 2*offset + 100)
+        text("Player O", 2*offset, 2*offset + 100)
+        fill(255)
+        rectMode(CENTER)
+        rect(offset, 2*offset, offset/2, offset/3)
+        rect(2*offset, 2*offset, offset/2, offset/3)
+        fill(0)
+        text(playerX, offset, 2*offset)
+        text(playerO, 2*offset, 2*offset)
+        fill(30, 0, 255)
+        rect(width/2, 2*offset, 0.5*offset, 0.25*offset)
+        fill(255)
+        text("PLAY", width/2, 2*offset)
+        if mousePressed and withinBounds(mouseX, 0, playBtnBounds) and withinBounds(mouseY, 2, playBtnBounds):
+            play = True
+            reset()
+        
+        
+def keyTyped():
     global playerX, playerO
-    background(0)
-    textSize(DIMENSION/14)
-    text("Type your names below", width/2, height/4)
-    textSize(DIMENSION/18)
-    text("Player X", offset, 2*offset + 100)
-    text("Player O", 2*offset, 2*offset + 100)
-    fill(255)
-    rectMode(CENTER)
-    rect(offset, 2*offset, offset/2, offset/3)
-    rect(2*offset, 2*offset, offset/2, offset/3)
-    fill(0)
-    text(str(playerX), offset, 2*offset)
-    text(str(playerO), 2*offset, 2*offset)
-    print(playerX)
-    print(playerO)
-    # if withinBounds(mouseX, 0, XtypeNameBounds) and withinBounds(mouseY, 2, XtypeNameBounds):
-    
-    if keyPressed:
-        if withinBounds(mouseX, 0, XtypeNameBounds) and withinBounds(mouseY, 2, XtypeNameBounds):    
-            if key > 31 and key != CODED:
-                playerX += key
-                
-        if withinBounds(mouseX, 0, OtypeNameBounds) and withinBounds(mouseY, 2, OtypeNameBounds):
-            if key > 31 and key != CODED:
-                playerO += key
-                
+    if withinBounds(mouseX, 0, XtypeNameBounds) and withinBounds(mouseY, 2, XtypeNameBounds): 
+        if key > 31 and key != CODED:
+            playerX = playerX + key
+                    
+    if withinBounds(mouseX, 0, OtypeNameBounds) and withinBounds(mouseY, 2, OtypeNameBounds):
+        if key > 31 and key != CODED:
+            playerO = playerO + key
+                    
     
             
     
@@ -132,7 +143,7 @@ def placeToken(activePlayer, x, y):
     switchPlayer()
 
 def mouseReleased():
-    if playStarted:
+    if play:
         if winner == "N":
             #For loop and if statement that checks where mouse is released and whether the square which the mouse was released on is already filled  
             for x in range(3):
@@ -231,7 +242,7 @@ def statsScreen():
     if mousePressed:
         background(0)
         textSize(DIMENSION/12)
-        text("Type your name below:", width/2, offset/2)
+        text("Leaderboard", width/2, offset/2)
 def leaderboard(): 
     global squarePlaced, winner
     fill(150)
@@ -248,8 +259,6 @@ def leaderboard():
             statsScreen()
             r = createReader("leaderboard.txt")
             winStats = [r.readLine()]
-            # for "X" in winStats:
-            #     print("X")
         
         
   
@@ -257,6 +266,9 @@ def leaderboard():
     
 def draw():
     startScreen()
+    if playerSelect:
+        playerSelectScreen()
+    
     for tokenCount in rowCount:
         determineWinner(tokenCount)
 
