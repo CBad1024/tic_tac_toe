@@ -1,3 +1,6 @@
+from Button import PlayAgainButton, PlayButton, StatsButton
+from Screen import StartScreen, GridScreen, PlayerSelectScreen
+from TextInfo import TextInfo
 
 def setup():
     # window size and color
@@ -13,7 +16,7 @@ def setup():
 
 #If play has begun yet
 playStarted = False
-playerSelect = False
+playerSelected = False
 play = False
 
 
@@ -44,63 +47,44 @@ xColor = "#F0B905"
 oColor = "#0AF0D3"
 tokenColor = xColor # initial Color for "X" token
 
+
 #Values which deetermine where to place the Xs and Os on the screen, as well as acting as values which, when plugged into an equation, allow us to map each X or O to a value in squarePlaced
 offset = DIMENSION/3
+
+
+playButton = PlayButton(offset)
+
 
 # Grid bounds
 bounds = [0, offset, 2*offset, 3*offset]
 
-# Button bounds
-playAgainBtnBounds = [0.625*offset, 1.375*offset, 1.875*offset, 2.125*offset]
-statsBtnBounds = [1.625*offset, 2.375*offset, 1.875*offset, 2.125*offset]
 XtypeNameBounds = [0.75*offset, 1.25*offset, 1.83*offset, 2.16*offset]
 OtypeNameBounds = [1.75*offset, 2.25*offset, 1.83*offset, 2.16*offset]
-playBtnBounds = [1.25*offset, 1.75*offset, 1.75*offset, 2.25*offset]
+
+
+leaders = []
+
 
 # Define helper functions
-def startScreen():
-    global playerSelect
-    if not playerSelect:
-        background(0)
+def showStartScreen():
+    global playerSelected
+    if not playerSelected:
+        StartScreen().display()
         
-        textSize(DIMENSION/14)
-        fill(0, 255, 0)
-        text("TIC TAC TOE", width/2, height/4)
-        textSize(DIMENSION/18)
-        text("Click anywhere to start...", width/2, height/2)
         if mousePressed:
-            playerSelect = True
+            playerSelected = True
             reset()
             
             
-            
-    
+# someButton = Button()
+playerScreen = PlayerSelectScreen(PlayButton(offset))  
     
 
-def playerSelectScreen():
+def showPlayerSelectScreen():
     global playerX, playerO, play
-    if playerSelect and not play:
-        background(0)
-        textSize(DIMENSION/14)
-        fill(0, 255, 0)
-        text("Type your names below", width/2, height/4)
-        textSize(DIMENSION/18)
-        text("Player X", offset, 2*offset + 100)
-        text("Player O", 2*offset, 2*offset + 100)
-        fill(255)
-        rectMode(CENTER)
-        rect(offset, 2*offset, offset/2, offset/3)
-        rect(2*offset, 2*offset, offset/2, offset/3)
-        fill(0)
-        text(playerX, offset, 2*offset)
-        text(playerO, 2*offset, 2*offset)
-        fill(30, 0, 255)
-        rect(width/2, 2*offset, 0.5*offset, 0.25*offset)
-        fill(255)
-        text("PLAY", width/2, 2*offset)
-        if mousePressed and withinBounds(mouseX, 0, playBtnBounds) and withinBounds(mouseY, 2, playBtnBounds):
-            play = True
-            reset()
+    if playerSelected and not play:
+        playerScreen.display()
+        
         
         
 def keyTyped():
@@ -141,18 +125,36 @@ def placeToken(activePlayer, x, y):
     if x+y == 2:
         diCount[1] += token
     switchPlayer()
+    
+def withinBounds(mPos, n, bounds):
+        return mPos > bounds[n] and mPos < bounds[n+1]
+
+gridScreen = GridScreen()
 
 def mouseReleased():
+    global play, leaders
     if play:
         if winner == "N":
+            
+            gridScreen.checkTokenPlaced(mouseX, mouseY)
+            
             #For loop and if statement that checks where mouse is released and whether the square which the mouse was released on is already filled  
             for x in range(3):
                 for y in range(3):
                     if withinBounds(mouseX, x, bounds) and withinBounds(mouseY, y, bounds) and emptySquare(x, y):
                         placeToken(player, x, y)        
         else: # Winner Found or it is a Draw
+            f = createWriter("leaderboard.txt")
+            f.print(winner)
+            f.flush()
+            f.close()
+            
             if playAgainClicked(): # Check if PlayAgain is Clicked
                 reset()
+    else:
+        if withinBounds(mouseX, 0, playBtnBounds) and withinBounds(mouseY, 2, playBtnBounds):
+            play = True
+            reset()
             
 def playAgainClicked():
     return withinBounds(mouseX,0, playAgainBtnBounds) and withinBounds(mouseY,2, playAgainBtnBounds)
@@ -160,20 +162,11 @@ def playAgainClicked():
 def statsClicked():
     return withinBounds(mouseX,0, statsBtnBounds) and withinBounds(mouseY,2, statsBtnBounds)
 
-def withinBounds(mPos, n, bounds):
-    return mPos > bounds[n] and mPos < bounds[n+1]
+
 
 def grid():
-    background(0)
-    
-    # lines, size, and color 
-    stroke(255)
-    strokeWeight(5)
+    GridScreen().display(offset)
 
-    line(offset,0,offset,height)     #Line column 1
-    line(2*offset,0,2*offset,height) #Line column 2
-    line(0,offset,width,offset)  #Line row 1
-    line(0,2*offset,width,2*offset)   #Line row 2
 
 def reset():
     global winner, squarePlaced, rowCount, columnCount, diCount, player, tokenColor, token
@@ -219,13 +212,13 @@ def winScreen(message):
     playAgain()
     leaderboard()
 
-def playAgain():    
-        fill(30, 0, 255)
-        rect(offset, 2*offset, 0.75*offset, 0.25*offset)
-        textSize(DIMENSION/30)
-        fill(255)
-        text("PLAY AGAIN", offset, 2*offset)
-        textSize(DIMENSION/6) ## reset the text size
+# def playAgain():    
+#         fill(30, 0, 255)
+#         rect(offset, 2*offset, 0.75*offset, 0.25*offset)
+#         textSize(DIMENSION/30)
+#         fill(255)
+#         text("PLAY AGAIN", offset, 2*offset)
+#         textSize(DIMENSION/6) ## reset the text size
         
 def randomColor():
     fill(random(255), random(255), random(255))
@@ -244,12 +237,13 @@ def statsScreen():
         textSize(DIMENSION/12)
         text("Leaderboard", width/2, offset/2)
 def leaderboard(): 
-    global squarePlaced, winner
-    fill(150)
-    textSize(DIMENSION/30)
-    rect(2*offset, 2*offset, 0.75*offset, 0.25*offset)
-    fill(255)
-    text("STATS", 2*offset, 2*offset)
+    global squarePlaced, winner, leaders
+    # Call Stats Button
+    # fill(150)
+    # textSize(DIMENSION/30)
+    # rect(2*offset, 2*offset, 0.75*offset, 0.25*offset)
+    # fill(255)
+    # text("STATS", 2*offset, 2*offset)
     
     if winner != "N" and winner != "STOP": 
         if statsClicked() and mousePressed:
@@ -257,17 +251,25 @@ def leaderboard():
             winner = "STOP"
             squarePlaced = [0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]
             statsScreen()
+            print(1)
             r = createReader("leaderboard.txt")
-            winStats = [r.readLine()]
+            for line in r:
+                overallWinner = line.strip()
+                leaders.append(overallWinner)
+                print(leaders)
+                
+            
+            
         
         
   
-    
+
     
 def draw():
-    startScreen()
-    if playerSelect:
-        playerSelectScreen()
+    showStartScreen()
+    
+    if playerSelected:
+        showPlayerSelectScreen()
     
     for tokenCount in rowCount:
         determineWinner(tokenCount)
@@ -283,8 +285,11 @@ def draw():
     
     if winner == "X" or winner == "O": # winner found
         winScreen(str(winner) + " wins")
+        
+        
     elif winner == "D":
         winScreen("DRAW")
+    
     
     
         
