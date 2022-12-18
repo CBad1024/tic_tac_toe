@@ -22,30 +22,13 @@ play = False
 
 
 
-#player name
-playerX = ""
-playerO = ""
 
 #Square dimensions
 DIMENSION = 600
 
-#list which stores the values of each square (0 means nothing in the square, +1 is an X in the square, -1 is an o in the square)
-squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-#Total value of +1 (x) and -1 (o) in a given row or column, going from left to right, top to bottom, and for the diagonals, the one going from top left ot bottom right is index 0 and the one going from bottom left to top right is index 1.
-rowCount = [0,0,0]
-columnCount = [0,0,0]
-diCount = [0,0]
 
 #Keeps track of who wins. N stands for nobody. If X wins, winner = "X", and if O wins, winner = "O"
 winner = "N"
-
-# counter that changes the player from x to o every turn
-player = "X"
-token = 1
-xColor = "#F0B905"
-oColor = "#0AF0D3"
-tokenColor = xColor # initial Color for "X" token
 
 
 #Values which deetermine where to place the Xs and Os on the screen, as well as acting as values which, when plugged into an equation, allow us to map each X or O to a value in squarePlaced
@@ -53,10 +36,8 @@ offset = DIMENSION/3
 
 
 playButton = PlayButton(offset)
-
-
-# Grid bounds
-bounds = [0, offset, 2*offset, 3*offset]
+gridScreen = GridScreen(offset)
+playAgainButton = PlayAgainButton(offset)
 
 XtypeNameBounds = [0.75*offset, 1.25*offset, 1.83*offset, 2.16*offset]
 OtypeNameBounds = [1.75*offset, 2.25*offset, 1.83*offset, 2.16*offset]
@@ -99,62 +80,34 @@ def keyTyped():
                     
     
             
-    
-    
-def switchPlayer():
-    global player, token, tokenColor
-    
-    if player == "X":
-        player = "O"
-        tokenColor = oColor
-    else:
-        player = "X"
-        tokenColor = xColor
-    token *= -1
-
-def placeToken(activePlayer, x, y):
-    global squarePlaced, columnCount, diCount, rowCount
-    textSize(DIMENSION/6)
-    fill(tokenColor)
-    text(activePlayer, (bounds[x+1]+bounds[x])/2, (bounds[y+1]+bounds[y])/2)
-    squarePlaced[3*x+y] = token
-    columnCount[x] += token
-    rowCount[y] += token
-    if x == y:
-        diCount[0] += token
-    if x+y == 2:
-        diCount[1] += token
-    switchPlayer()
+player = Player("X")
     
 def withinBounds(mPos, n, bounds):
         return mPos > bounds[n] and mPos < bounds[n+1]
 
-gridScreen = GridScreen()
+
 
 def mouseReleased():
     global play, leaders
     if play:
         if winner == "N":
-            
-            gridScreen.checkTokenPlaced(mouseX, mouseY)
-            
-            #For loop and if statement that checks where mouse is released and whether the square which the mouse was released on is already filled  
-            for x in range(3):
-                for y in range(3):
-                    if withinBounds(mouseX, x, bounds) and withinBounds(mouseY, y, bounds) and emptySquare(x, y):
-                        placeToken(player, x, y)        
+            if gridScreen.tokenPlaced(mouseX, mouseY, player):
+                player.switch()
+        
         else: # Winner Found or it is a Draw
-            f = createWriter("leaderboard.txt")
-            f.print(winner)
-            f.flush()
-            f.close()
+            # f = createWriter("leaderboard.txt")
+            # f.print(winner)
+            # f.flush()
+            # f.close()
             
-            if playAgainClicked(): # Check if PlayAgain is Clicked
+            if playAgainButton.clicked(mouseX, mouseY):
                 reset()
+
     else:
-        if withinBounds(mouseX, 0, playBtnBounds) and withinBounds(mouseY, 2, playBtnBounds):
+        if playButton.clicked(mouseX, mouseY):
             play = True
             reset()
+
             
 def playAgainClicked():
     return withinBounds(mouseX,0, playAgainBtnBounds) and withinBounds(mouseY,2, playAgainBtnBounds)
@@ -163,29 +116,18 @@ def statsClicked():
     return withinBounds(mouseX,0, statsBtnBounds) and withinBounds(mouseY,2, statsBtnBounds)
 
 
-
-def grid():
-    GridScreen().display(offset)
-
+gridScreen = GridScreen()
 
 def reset():
-    global winner, squarePlaced, rowCount, columnCount, diCount, player, tokenColor, token
+    global winner, player, gridScreen
     
-    grid()
+    gridScreen = GridScreen()
+    gridScreen.display(offset)
     
     #initialize values
     winner = "N"
-    squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    rowCount = [0, 0, 0]
-    columnCount = [0, 0, 0]
-    diCount = [0, 0]
-    player = "X"
-    tokenColor = xColor
-    token = 1
+    player = Player("X")
 
-def emptySquare(x, y):
-    global squarePlaced
-    return squarePlaced[3*x+y] == 0
 
 def determineWinner(n):
     global winner
