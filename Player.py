@@ -2,7 +2,7 @@ class Player(object):
     
     def __init__(self, token):
         self.token = token
-        setValues()
+        self.setValues()
 
             
     def setValues(self):

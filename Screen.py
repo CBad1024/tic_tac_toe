@@ -1,9 +1,6 @@
 class Screen(object):
-    
-    # Buttons can be a list of buttons
-    
-    # TextInfo can be a list of TextInfo objects on the screen
         
+    ## This class is not used
     def __init__(self, bColor, buttons, textInfo):
         self.bColor = bColor
         self.buttons = buttons
@@ -18,14 +15,21 @@ class Screen(object):
             button.display()
             
 class StartScreen(object):
+    
+    def __init__(self, dim, ht, wt):
+        self.dim = dim
+        self.ht = ht
+        self.wt = wt
             
     def display(self):
         background(0)
-        textSize(DIMENSION/14)
+        textSize(self.dim/14)
         fill(0, 255, 0)
-        text("TIC TAC TOE", width/2, height/4)
-        textSize(DIMENSION/18)
-        text("Click anywhere to start...", width/2, height/2)
+        text("TIC TAC TOE", self.wt/2, self.ht/4)
+        textSize(self.dim/18)
+        text("Click anywhere to start...", self.wt/2, self.ht/2)
+
+
 
 class PlayerSelectScreen(object):
     
@@ -52,27 +56,28 @@ class PlayerSelectScreen(object):
         self.button.display()
 
 class GridScreen(object):
-    
-    rowCount = [0,0,0]
-    columnCount = [0,0,0]
-    diCount = [0,0]
-    
-    # This is a 3 by 3 grid screen
-    squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    activePlay = False
-    token = 1
-
 
     def __init__(self, offset):
         self.offset = offset
         self.bounds = [0, offset, 2*offset, 3*offset]
 
+        self.setValues()
+        
 
+    def setValues(self):
+        self.squarePlaced = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        self.rowCount = [0,0,0]
+        self.columnCount = [0,0,0]
+        self.diCount = [0,0]
+        
+    def reset(self):
+        self.setValues()
+        
     def tokenPlaced(self, mxPos, myPos, player):
         for x in range(3):
             for y in range(3):
-                if withinBounds(mxPos, x) and withinBounds(myPos, y) and emptySquare(x, y):
-                    placePlayer(player, x, y)
+                if self.withinBounds(mxPos, x) and self.withinBounds(myPos, y) and self.emptySquare(x, y):
+                    self.placePlayer(player, x, y)
                     return True
         return False
 
@@ -90,9 +95,10 @@ class GridScreen(object):
         
     
     def emptySquare(self, x, y):
-        return squarePlaced[3*x+y] == 0  
+        return self.squarePlaced[3*x+y] == 0  
     
-    def display(self, offset):
+    def display(self):
+        offset = self.offset
         background(0)
     
         # lines, size, and color 

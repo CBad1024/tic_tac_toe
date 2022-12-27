@@ -1,6 +1,6 @@
 from Button import PlayAgainButton, PlayButton, StatsButton
 from Screen import StartScreen, GridScreen, PlayerSelectScreen
-from TextInfo import TextInfo
+from Player import Player
 
 def setup():
     # window size and color
@@ -25,14 +25,13 @@ play = False
 
 #Square dimensions
 DIMENSION = 600
-
+#Values which deetermine where to place the Xs and Os on the screen, as well as acting as values which, when plugged into an equation, allow us to map each X or O to a value in squarePlaced
+offset = DIMENSION/3
 
 #Keeps track of who wins. N stands for nobody. If X wins, winner = "X", and if O wins, winner = "O"
 winner = "N"
 
-
-#Values which deetermine where to place the Xs and Os on the screen, as well as acting as values which, when plugged into an equation, allow us to map each X or O to a value in squarePlaced
-offset = DIMENSION/3
+player = Player("X")
 
 
 playButton = PlayButton(offset)
@@ -50,23 +49,23 @@ leaders = []
 def showStartScreen():
     global playerSelected
     if not playerSelected:
-        StartScreen().display()
-        
+        StartScreen(DIMENSION, height, width).display()
         if mousePressed:
+            println("Called ###")
             playerSelected = True
             reset()
             
-            
-# someButton = Button()
-playerScreen = PlayerSelectScreen(PlayButton(offset))  
-    
+
+playerScreen = PlayerSelectScreen(playButton)  
+
 
 def showPlayerSelectScreen():
-    global playerX, playerO, play
     if playerSelected and not play:
         playerScreen.display()
         
-        
+
+playerX = ""
+playerO = ""    
         
 def keyTyped():
     global playerX, playerO
@@ -79,17 +78,16 @@ def keyTyped():
             playerO = playerO + key
                     
     
-            
-player = Player("X")
-    
 def withinBounds(mPos, n, bounds):
         return mPos > bounds[n] and mPos < bounds[n+1]
 
 
 
 def mouseReleased():
-    global play, leaders
+    println("Called***")
+
     if play:
+        println("Called!!!")
         if winner == "N":
             if gridScreen.tokenPlaced(mouseX, mouseY, player):
                 player.switch()
@@ -104,25 +102,22 @@ def mouseReleased():
                 reset()
 
     else:
+        println("Called here")
         if playButton.clicked(mouseX, mouseY):
             play = True
             reset()
 
-            
-def playAgainClicked():
-    return withinBounds(mouseX,0, playAgainBtnBounds) and withinBounds(mouseY,2, playAgainBtnBounds)
 
 def statsClicked():
     return withinBounds(mouseX,0, statsBtnBounds) and withinBounds(mouseY,2, statsBtnBounds)
 
 
-gridScreen = GridScreen()
-
 def reset():
     global winner, player, gridScreen
+    println("Inside reset")
     
-    gridScreen = GridScreen()
-    gridScreen.display(offset)
+    gridScreen.reset()
+    gridScreen.display()
     
     #initialize values
     winner = "N"
@@ -153,14 +148,6 @@ def winScreen(message):
     text(message, width/2, height/2+offset/10)
     playAgain()
     leaderboard()
-
-# def playAgain():    
-#         fill(30, 0, 255)
-#         rect(offset, 2*offset, 0.75*offset, 0.25*offset)
-#         textSize(DIMENSION/30)
-#         fill(255)
-#         text("PLAY AGAIN", offset, 2*offset)
-#         textSize(DIMENSION/6) ## reset the text size
         
 def randomColor():
     fill(random(255), random(255), random(255))
@@ -168,7 +155,7 @@ def randomColor():
 def checkTie(): 
     global winner   
     if winner == "N": # no winner found
-        if  not ( 0 in squarePlaced):
+        if  not ( 0 in gridScreen.squarePlaced):
         # this is a tie : no more empty squares
             winner = "D"  # Draw 
         
@@ -178,6 +165,7 @@ def statsScreen():
         background(0)
         textSize(DIMENSION/12)
         text("Leaderboard", width/2, offset/2)
+        
 def leaderboard(): 
     global squarePlaced, winner, leaders
     # Call Stats Button
@@ -213,15 +201,14 @@ def draw():
     if playerSelected:
         showPlayerSelectScreen()
     
-    for tokenCount in rowCount:
+    for tokenCount in gridScreen.rowCount:
         determineWinner(tokenCount)
 
-    for tokenCount in columnCount:
+    for tokenCount in gridScreen.columnCount:
         determineWinner(tokenCount)
 
-    for tokenCount in diCount:
+    for tokenCount in gridScreen.diCount:
         determineWinner(tokenCount)
-        
 
     checkTie()
     
