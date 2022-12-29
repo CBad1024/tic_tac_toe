@@ -60,7 +60,6 @@ def mouseReleased():
     
     if startScreen.isActive(): # Screen 1
         if leaderBoardButton.clicked(mouseX, mouseY):
-            print("IN the leader board button")
             statsScreen.display()
         else:
             playerScreen.activate()
