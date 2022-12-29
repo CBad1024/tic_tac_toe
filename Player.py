@@ -14,10 +14,11 @@ class Player(object):
             self.tValue = -1
         
     def display(self, x, y):
+        DIMENSION = 600
         textSize(DIMENSION/6)
         fill(self.tColor)
         text(self.token, x, y)
     
     def switch(self):
-        self.token = "O" if tValue > 0 else "X"
-        setValues()
+        self.token = "O" if self.tValue > 0 else "X"
+        self.setValues()

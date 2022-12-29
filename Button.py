@@ -18,6 +18,7 @@ class PlayAgainButton(Button):
         self.value = "PLAY AGAIN"
     
     def display(self):
+        DIMENSION = 600
         offset = self.offset
         fill(30, 0, 255)
         rect(offset, 2*offset, 0.75*offset, 0.25*offset)
@@ -33,20 +34,40 @@ class StatsButton(Button):
         self.value = "STATS"
         
     def display(self):
+        DIMENSION = 600
         offset = self.offset
         fill(150)
         textSize(DIMENSION/30)
         rect(2*offset, 2*offset, 0.75*offset, 0.25*offset)
         fill(255)
-        text(value, 2*offset, 2*offset)
+        text(self.value, 2*offset, 2*offset)
+
+    
         
+class LeaderBoard(Button):
+    
+    def __init__ (self, offset):
+        super(LeaderBoard, self).__init__(offset)
+        self.bounds = [offset, 2*offset, 1.75*offset, 2.25*offset]
+        self.value = "Leaderboard"
+        
+    def display(self):
+        DIMENSION = 600
+        offset = self.offset
+        fill(150)
+        textSize(DIMENSION/30)
+        rectMode(CENTER)
+        rect(DIMENSION/2, 2*offset, offset, 0.5*offset)
+        fill(255)
+        text(self.value, DIMENSION/2, 2*offset)
+            
 class PlayButton(Button):
     
     def __init__(self, offset):
         # print("PLAY CALLED")
         super(PlayButton, self).__init__(offset)
         self.bounds = [1.25*offset, 1.75*offset, 1.75*offset, 2.25*offset]
-        self.value = "PLAY"
+        self.value = "PLAY."
         
     def display(self):
         offset = self.offset
