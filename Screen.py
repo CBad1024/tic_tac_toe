@@ -33,10 +33,13 @@ class StartScreen(object):
 
 class PlayerSelectScreen(object):
     
-    def __init__(self, button):
+    def __init__(self, button, offset):
+        print("I am inside the constructor")
         self.button = button
+        self.offset = offset
     
     def display(self):
+        offset = self.offset
         background(0)
         textSize(DIMENSION/14)
         fill(0, 255, 0)
@@ -108,7 +111,8 @@ class GridScreen(object):
         line(offset,0,offset,height)     #Line column 1
         line(2*offset,0,2*offset,height) #Line column 2
         line(0,offset,width,offset)  #Line row 1
-        line(0,2*offset,width,2*offset)   #Line row 2        
+        line(0,2*offset,width,2*offset)   #Line row 2  
+        print("I am here in display")      
         
     def withinBounds(self, mPos, n):
         return mPos > self.bounds[n] and mPos < self.bounds[n+1]

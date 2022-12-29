@@ -48,15 +48,14 @@ leaders = []
 # Define helper functions
 def showStartScreen():
     global playerSelected
-    if not playerSelected:
-        StartScreen(DIMENSION, height, width).display()
-        if mousePressed:
-            println("Called ###")
-            playerSelected = True
-            reset()
+    StartScreen(DIMENSION, height, width).display()
+    if mousePressed:
+        println("Called ###")
+        playerSelected = True
+        reset()
             
 
-playerScreen = PlayerSelectScreen(playButton)  
+playerScreen = PlayerSelectScreen(playButton, offset)  
 
 
 def showPlayerSelectScreen():
@@ -123,8 +122,17 @@ def reset():
     winner = "N"
     player = Player("X")
 
+def determineWinner():
+    for tokenCount in gridScreen.rowCount:
+        findWinner(tokenCount)
 
-def determineWinner(n):
+    for tokenCount in gridScreen.columnCount:
+        findWinner(tokenCount)
+
+    for tokenCount in gridScreen.diCount:
+        findWinner(tokenCount)
+
+def findWinner(n):
     global winner
     
     if winner == "N":
@@ -188,36 +196,25 @@ def leaderboard():
                 leaders.append(overallWinner)
                 print(leaders)
                 
-            
-            
-        
-        
-  
-
-    
+def announceWinner():
+    if winner == "X" or winner == "O": # winner found
+        winScreen(str(winner) + " wins")
+    elif winner == "D":
+        winScreen("DRAW")  
+              
 def draw():
-    showStartScreen()
+    if not playerSelected:
+        showStartScreen()
     
     if playerSelected:
         showPlayerSelectScreen()
     
-    for tokenCount in gridScreen.rowCount:
-        determineWinner(tokenCount)
-
-    for tokenCount in gridScreen.columnCount:
-        determineWinner(tokenCount)
-
-    for tokenCount in gridScreen.diCount:
-        determineWinner(tokenCount)
-
+    determineWinner()
+    
     checkTie()
     
-    if winner == "X" or winner == "O": # winner found
-        winScreen(str(winner) + " wins")
-        
-        
-    elif winner == "D":
-        winScreen("DRAW")
+    announceWinner()
+    
     
     
     
